@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Simple dapp</title>
+  <script type="module" src="main.js"></script>
+</head>
+
+<body>
+  <!-- Display a connect button and the current account -->
+  <button class="enableEthereumButton">Enable Ethereum</button>
+  <h2>Account: <span class="showAccount"></span></h2>
+
+  <button onclick="sessionStorage.clear();">logout</button>
+  <script>
+    if (sessionStorage.getItem("account") !== null) {
+      window.location.replace("dashboard.html");
+    }
+  </script>
+</body>
+
+</html>
