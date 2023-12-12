@@ -6,7 +6,7 @@ LABEL io.cartesi.rollups.ram_size=128Mi
 
 ARG MACHINE_EMULATOR_TOOLS_VERSION=0.12.0
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends busybox-static ca-certificates curl && \
+    apt-get install -y --no-install-recommends busybox-static ca-certificates curl build-essential=12.9ubuntu3 && \
     curl -fsSL https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.tar.gz | tar -C / --overwrite -xvzf - && \
     rm -rf /var/lib/apt/lists/*
 
@@ -18,6 +18,7 @@ COPY ./requirements.txt .
 RUN pip install -r requirements.txt --no-cache && \
     find /usr/local/lib -type d -name __pycache__ -exec rm -r {} +
 
+COPY ./app ./app
 COPY ./dapp.py .
 
 ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"

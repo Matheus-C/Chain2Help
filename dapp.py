@@ -1,18 +1,18 @@
 from os import environ
 import requests
 import json
-import util
+import app.util as util
 from urllib.parse import urlparse
 
-from eth_abi_ext import decode_packed
+from app.eth_abi_ext import decode_packed
 from eth_abi.abi import encode
 
-import wallet
-from auctioneer import Auctioneer
-from encoders import BalanceEncoder
-from outputs import Error, Log, Output
-from routing import Router
-from log import logger
+import app.wallet as wallet
+from app.auctioneer import Auctioneer
+from app.encoders import BalanceEncoder
+from app.outputs import Error, Log, Output
+from app.routing import Router
+from app.log import logger
 
 logger.info("Chain2Help started")
 
@@ -41,12 +41,8 @@ def send_request(output):
         for item in output:
             send_request(item)
 
-def post(endpoint, json):
-    response = requests.post(f"{rollup_server}/{endpoint}", json=json)
-    logger.info(f"Received {endpoint} status {response.status_code} body {response.content}")
-
 def handle_advance(data):
-    logger.info(f"Received advance request data {data}")
+    logger.debug(f"Received advance request data {data}")
 
     try:
         sender = data["metadata"]["msg_sender"].lower()
