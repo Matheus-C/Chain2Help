@@ -49,7 +49,6 @@ function handleAccountsChanged(accounts) {
     console.log('Please connect to MetaMask.');
   } else if (accounts[0] !== currentAccount) {
     currentAccount = accounts[0];
-    showAccount.innerHTML = currentAccount;
   }
   
 }
@@ -63,7 +62,6 @@ const showAccount = document.querySelector('.showAccount');
 
 ethereumButton.addEventListener('click', () => {
   getAccount().then(sessionStorage.setItem("account", JSON.stringify(currentAccount)));
-  window.location.replace("dashboard.html");
 });
 
 async function getAccount() {
@@ -78,6 +76,5 @@ async function getAccount() {
   currentAccount = accounts[0];
   
   sessionStorage.setItem("account", JSON.stringify(await accounts[0]));
-  showAccount.innerHTML = sessionStorage.getItem("account");
   window.location.replace("dashboard.html");
 }
