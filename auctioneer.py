@@ -106,8 +106,8 @@ class Auctioneer():
             if not campaign:
                 raise ValueError(f"Campaign with id {campaign_id} not found")
 
-            # if donor == campaign.creator:
-            #     raise ValueError(f"Account {donor} cannot donate on its own campaign")
+            if donor == campaign.creator:
+                raise ValueError(f"Account {donor} cannot donate on its own campaign")
 
             if timestamp < campaign.start_date:
                 raise ValueError(f"Donate arrived before campaign start date: '{campaign.start_date.isoformat()}'")
