@@ -112,14 +112,49 @@ class Auctioneer():
                 raise ValueError(f"Account {donor} doesn't have enough funds")
 
             new_donation = Donation(campaign_id, donor, amount, timestamp)
+
+            output = self._wallet.erc20_transfer(account=new_donation.author, to=campaign.creator,
+                erc20=campaign.erc20, amount=new_donation.amount)
+            if type(output) is Error:
+                return output
+
             campaign.donate(new_donation)
 
-            logger.info(f"Donation of '{amount} {campaign.erc20}' placed for {campaign_id}")
+            logger.info(f"Donation of '{amount} {campaign.erc20}' placed for campaign {campaign_id}")
 
             donation_json = json.dumps(new_donation, cls=DonationEncoder)
-            return Notice(f'{{"type": "donate", "content": {donation_json}}}')
+            notice =  Notice(f'{{"type": "donate", "content": {donation_json}}}')
+
+            outputs: list[Output] = [output, notice]
+            return outputs
         except Exception as error:
             error_msg = f"Failed to donate. {error}"
+            logger.debug(error_msg, exc_info=True)
+
+            return Error(error_msg)
+
+    def campaign_end(self, campaign_id, msg_date, msg_sender, force=False):
+
+        try:
+            campaign = self._campaigns.get(campaign_id)
+
+            if not campaign:
+                raise ValueError(f"Campaign with id {campaign_id} not found")
+
+            if campaign.creator != msg_sender:
+                raise ValueError("Only the campaign creator account can finish the campaign")
+
+            if msg_date < campaign.end_date and not force:
+                raise ValueError(f"The campaign can only be ended after {campaign.end_date.isoformat()}")
+
+            campaign.finish()
+
+            logger.info(f"Campaign {campaign.id} finished")
+
+            campaign_json = json.dumps(campaign, cls=CampaignEncoder)
+            return Notice(f'{{"type": "campaign_end", "content": {campaign_json}}}')
+        except Exception as error:
+            error_msg = f"Failed to end campaign. {error}"
             logger.debug(error_msg, exc_info=True)
 
             return Error(error_msg)

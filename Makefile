@@ -15,3 +15,7 @@ run:
 .PHONY: run-local
 run-local:
 	@ sunodo run --no-backend
+
+.PHONY: test
+test:
+	@ ./setup_campaign.sh

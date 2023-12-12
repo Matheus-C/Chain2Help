@@ -58,6 +58,14 @@ class BalanceRoute(WalletRoute):
         balance = self._wallet.balance_get(account)
         return Log(json.dumps(balance, cls=BalanceEncoder))
 
+class WithdrawRoute(WalletRoute):
+
+    def execute(self, match_result, request=None):
+        super().execute(match_result, request)
+        return self._wallet.erc20_withdraw(self._msg_sender,
+                                           self._request_args.get("erc20").lower(),
+                                           self._request_args.get("amount"))
+
 class AuctioneerRoute(AdvanceRoute):
 
     def __init__(self, auctioneer):
@@ -81,6 +89,22 @@ class CreateCampaignRoute(AuctioneerRoute):
                                                self._request_args.get("start_date"),
                                                self._request_args.get("end_date"),
                                                self._msg_timestamp)
+
+class EndCampaignRoute(AuctioneerRoute):
+
+    def execute(self, match_result, request=None):
+        super().execute(match_result, request)
+        return self._auctioneer.campaign_end(self._request_args.get("campaign_id"),
+                                             self._msg_timestamp,
+                                             self._msg_sender,
+                                             self._request_args.get("force"))
+
+class DonateRoute(AuctioneerRoute):
+
+    def execute(self, match_result, request=None):
+        super().execute(match_result, request)
+        return self._auctioneer.donate(self._msg_sender, self._request_args.get("campaign_id"),
+                                        self._request_args.get("amount"), self._msg_timestamp)
 
 class InspectRoute(DefaultRoute):
 
@@ -107,13 +131,6 @@ class ListCampaignDonationsRoute(InspectRoute):
     def execute(self, match_result, request=None):
         return self._auctioneer.campaign_list_donations(int(match_result["campaign_id"]))
 
-class DonateRoute(AuctioneerRoute):
-
-    def execute(self, match_result, request=None):
-        super().execute(match_result, request)
-        return self._auctioneer.donate(self._msg_sender, self._request_args.get("campaign_id"),
-                                        self._request_args.get("amount"), self._msg_timestamp)
-
 class Router():
 
     def __init__(self, wallet, auctioneer):
@@ -122,9 +139,11 @@ class Router():
             "campaign_list": ListCampaignsRoute(auctioneer),
             "campaign_detail": DetailCampaignRoute(auctioneer),
             "campaign_donations": ListCampaignDonationsRoute(auctioneer),
+            "campaign_end": EndCampaignRoute(auctioneer),
             "donate": DonateRoute(auctioneer),
             "deposit": DepositRoute(wallet),
             "balance": BalanceRoute(wallet),
+            "withdraw": WithdrawRoute(wallet),
         }
 
         self._route_map = Mapper()
@@ -132,9 +151,11 @@ class Router():
         self._route_map.connect(None, "campaign", controller="campaign_list", action="execute")
         self._route_map.connect(None, "campaign/{campaign_id}", controller="campaign_detail", action="execute")
         self._route_map.connect(None, "campaign/{campaign_id}/donations", controller="campaign_donations", action="execute")
+        self._route_map.connect(None, "end", controller="campaign_end", action="execute")
         self._route_map.connect(None, "donate", controller="donate", action="execute")
         self._route_map.connect(None, "deposit", controller="deposit", action="execute")
         self._route_map.connect(None, "balance/{account}", controller="balance", action="execute")
+        self._route_map.connect(None, "withdraw", controller="withdraw", action="execute")
 
     def process(self, route, request=None):
         route = route.lower()
