@@ -14,12 +14,12 @@ import json
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
-import wallet as Wallet
-from auctioneer import Auctioneer
-from encoders import BalanceEncoder
-from log import logger
-from outputs import Error, Log
-from util import hex2str
+import app.wallet as Wallet
+from app.auctioneer import Auctioneer
+from app.encoders import BalanceEncoder
+from app.log import logger
+from app.outputs import Error, Log
+from app.util import hex2str
 from routes import Mapper
 
 class DefaultRoute():
@@ -31,10 +31,8 @@ class AdvanceRoute(DefaultRoute):
 
     def _parse_request(self, request):
         self._msg_sender = request["metadata"]["msg_sender"]
-        self._msg_timestamp = datetime.fromtimestamp(
-            request["metadata"]["timestamp"])
-        request_payload = json.loads(
-            hex2str(request["payload"]))
+        self._msg_timestamp = datetime.fromtimestamp(request["metadata"]["timestamp"])
+        request_payload = json.loads(hex2str(request["payload"]))
         self._request_args = request_payload["args"]
 
     def execute(self, match_result, request=None):
@@ -102,24 +100,19 @@ class ListCampaignsRoute(InspectRoute):
 class DetailCampaignRoute(InspectRoute):
 
     def execute(self, match_result, request=None):
-        return self._auctioneer.campaign_detail(
-            int(match_result["campaign_id"]))
+        return self._auctioneer.campaign_detail(int(match_result["campaign_id"]))
 
 class ListCampaignDonationsRoute(InspectRoute):
 
     def execute(self, match_result, request=None):
-        return self._auctioneer.campaign_list_donations(
-            int(match_result["campaign_id"]))
+        return self._auctioneer.campaign_list_donations(int(match_result["campaign_id"]))
 
 class DonateRoute(AuctioneerRoute):
 
     def execute(self, match_result, request=None):
         super().execute(match_result, request)
-        return self._auctioneer.donate(self._msg_sender,
-                                            self._request_args.get(
-                                                "campaign_id"),
-                                            self._request_args.get("amount"),
-                                            self._msg_timestamp)
+        return self._auctioneer.donate(self._msg_sender, self._request_args.get("campaign_id"),
+                                        self._request_args.get("amount"), self._msg_timestamp)
 
 class Router():
 

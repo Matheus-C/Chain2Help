@@ -1,8 +1,8 @@
 from datetime import datetime
 from json import JSONEncoder
 
-from balance import Balance
-from campaign import Campaign, Donation
+from app.balance import Balance
+from app.campaign import Campaign, Donation
 
 
 class PrivatePropertyEncoder(JSONEncoder):
@@ -19,6 +19,7 @@ class CampaignEncoder(PrivatePropertyEncoder):
         if isinstance(o, Campaign):
             props = o.__dict__.copy()
             props = self._normalize_keys(props)
+            props["founds"] = o.founds
             del props["donations"]
             return props
         elif isinstance(o, Donation):

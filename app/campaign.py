@@ -13,7 +13,7 @@ class Donation:
 
     @property
     def campaign_id(self):
-        return self.campaign_id
+        return self._campaign_id
 
     @property
     def author(self):
@@ -96,6 +96,10 @@ class Campaign:
     @property
     def goal(self):
         return self._goal
+
+    @property
+    def founds(self):
+        return sum(d.amount for d in self.donations)
 
     @property
     def donations(self):

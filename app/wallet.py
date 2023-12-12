@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 
-from balance import Balance
-from log import logger
-from outputs import Error, Notice, Voucher
+from app.balance import Balance
+from app.log import logger
+from app.outputs import Error, Notice, Voucher
 from eth_abi import decode, encode
-from eth_abi_ext import decode_packed
+from app.eth_abi_ext import decode_packed
 
 # Function selector to be called during the execution of a voucher that transfers funds,
 # which corresponds to the first 4 bytes of the Keccak256-encoded result of "transfer(address,uint256)"
@@ -52,8 +52,7 @@ def erc20_deposit_process(payload:str):
     binary_payload = bytes.fromhex(payload[2:])
     try:
         account, erc20, amount = _erc20_deposit_parse(binary_payload)
-        logger.info(f"'{amount} {erc20}' tokens deposited "
-                    f"in account '{account}'")
+        logger.info(f"'{amount} {erc20}' tokens deposited in account '{account}'")
         return _erc20_deposit(account, erc20, amount)
     except ValueError as error:
         error_msg = f"{error}"
