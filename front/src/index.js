@@ -63,6 +63,7 @@ const showAccount = document.querySelector('.showAccount');
 
 ethereumButton.addEventListener('click', () => {
   getAccount().then(sessionStorage.setItem("account", JSON.stringify(currentAccount)));
+  window.location.replace("dashboard.html");
 });
 
 async function getAccount() {
